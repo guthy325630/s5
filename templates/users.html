@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h3>新增用户</h3>
+  <form method="post" action="{{ url_for('create_user') }}" class="row">
+    <input name="username" placeholder="用户名" required>
+    <input name="password" placeholder="密码" required>
+    <input name="remark" placeholder="备注">
+    <button type="submit">新增并同步</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>用户列表</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>用户名</th>
+        <th>备注</th>
+        <th>状态</th>
+        <th>在线连接</th>
+        <th>累计上行</th>
+        <th>累计下行</th>
+        <th>累计时长(秒)</th>
+        <th>会话</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u["id"] }}</td>
+        <td>{{ u["username"] }}</td>
+        <td>
+          <form method="post" action="{{ url_for('update_remark', user_id=u['id']) }}" class="row">
+            <input name="remark" value="{{ u['remark'] or '' }}" placeholder="备注">
+            <button type="submit">保存</button>
+          </form>
+        </td>
+        <td>
+          {% if u["status"] == "active" %}
+            <span class="ok">正常</span>
+          {% else %}
+            <span class="ban">封禁</span>
+          {% endif %}
+        </td>
+        <td>{{ u["online_count"] }}</td>
+        <td>{{ u["total_up"] }}</td>
+        <td>{{ u["total_down"] }}</td>
+        <td>{{ u["total_duration"] }}</td>
+        <td><a href="{{ url_for('user_sessions', user_id=u['id']) }}">查看</a></td>
+        <td>
+          <div class="row">
+            {% if u["status"] == "active" %}
+            <form method="post" action="{{ url_for('ban_user', user_id=u['id']) }}">
+              <button type="submit">封禁</button>
+            </form>
+            {% else %}
+            <form method="post" action="{{ url_for('unban_user', user_id=u['id']) }}">
+              <button type="submit">解封</button>
+            </form>
+            {% endif %}
+            <form method="post" action="{{ url_for('delete_user', user_id=u['id']) }}" onsubmit="return confirm('确认删除用户?');">
+              <button type="submit">删除</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="10">暂无用户</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h3>流量趋势图</h3>
+  <form method="get" action="{{ url_for('reports') }}" class="row" style="margin-bottom: 10px;">
+    <select name="user_id">
+      <option value="all" {% if selected_user == "all" %}selected{% endif %}>全部用户</option>
+      {% for u in users %}
+      <option value="{{ u['id'] }}" {% if selected_user == (u['id'] | string) %}selected{% endif %}>{{ u['username'] }}</option>
+      {% endfor %}
+    </select>
+    <select name="days">
+      <option value="7" {% if days == 7 %}selected{% endif %}>近7天</option>
+      <option value="30" {% if days == 30 %}selected{% endif %}>近30天</option>
+    </select>
+    <button type="submit">查询</button>
+  </form>
+  <canvas id="trendChart" height="120"></canvas>
+</div>
+
+<div class="card">
+  <h3>每日汇总报表</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>日期</th>
+        <th>用户</th>
+        <th>上行(字节)</th>
+        <th>下行(字节)</th>
+        <th>总流量(字节)</th>
+        <th>连接时长(秒)</th>
+        <th>连接次数</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in daily_rows %}
+      <tr>
+        <td>{{ r["day"] }}</td>
+        <td>{{ r["username"] }}</td>
+        <td>{{ r["bytes_up"] }}</td>
+        <td>{{ r["bytes_down"] }}</td>
+        <td>{{ (r["bytes_up"] or 0) + (r["bytes_down"] or 0) }}</td>
+        <td>{{ r["duration_sec"] }}</td>
+        <td>{{ r["conn_count"] }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7">暂无日报数据，请先在仪表盘执行采集</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  (function () {
+    const labels = {{ trend_days_json | safe }};
+    const values = {{ trend_values_json | safe }};
+    const canvas = document.getElementById("trendChart");
+    if (!canvas || !labels.length) return;
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width = canvas.clientWidth || 900;
+    const h = canvas.height = 220;
+    const pad = 30;
+    const maxV = Math.max(...values, 1);
+    const minV = 0;
+    const xStep = labels.length > 1 ? (w - pad * 2) / (labels.length - 1) : 0;
+    const yOf = (v) => h - pad - ((v - minV) / (maxV - minV)) * (h - pad * 2);
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = "#d0d7e2";
+    ctx.beginPath();
+    ctx.moveTo(pad, h - pad);
+    ctx.lineTo(w - pad, h - pad);
+    ctx.moveTo(pad, pad);
+    ctx.lineTo(pad, h - pad);
+    ctx.stroke();
+
+    ctx.strokeStyle = "#0b57d0";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    values.forEach((v, i) => {
+      const x = pad + i * xStep;
+      const y = yOf(v);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = "#0b57d0";
+    ctx.font = "12px Arial";
+    values.forEach((v, i) => {
+      const x = pad + i * xStep;
+      const y = yOf(v);
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fill();
+      if (i === 0 || i === values.length - 1 || i % 3 === 0) {
+        ctx.fillText(labels[i], x - 18, h - 8);
+      }
+    });
+  })();
+</script>
+{% endblock %}

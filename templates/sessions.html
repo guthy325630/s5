@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h3>用户会话 - {{ user["username"] }}</h3>
+  <p>备注：{{ user["remark"] or "-" }}</p>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>来源IP</th>
+        <th>开始时间</th>
+        <th>结束时间</th>
+        <th>时长(秒)</th>
+        <th>上行</th>
+        <th>下行</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in sessions %}
+      <tr>
+        <td>{{ s["id"] }}</td>
+        <td>{{ s["src_ip"] }}</td>
+        <td>{{ s["start_at"] }}</td>
+        <td>{{ s["end_at"] or "-" }}</td>
+        <td>{{ s["duration_sec"] }}</td>
+        <td>{{ s["bytes_up"] }}</td>
+        <td>{{ s["bytes_down"] }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7">暂无会话记录</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

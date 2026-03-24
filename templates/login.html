@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SOCKS5 后台登录</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f6f8fb; margin: 0; }
+    .wrap { width: 320px; margin: 120px auto; background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+    .item { margin-bottom: 10px; }
+    input, button { width: 100%; padding: 8px; box-sizing: border-box; }
+    button { cursor: pointer; }
+    .msg { color: #b42318; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h3>SOCKS5 后台登录</h3>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="msg">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="post">
+      <div class="item"><input name="username" placeholder="管理员账号"></div>
+      <div class="item"><input name="password" type="password" placeholder="管理员密码"></div>
+      <button type="submit">登录</button>
+    </form>
+  </div>
+</body>
+</html>

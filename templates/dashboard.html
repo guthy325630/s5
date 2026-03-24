@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid">
+  <div class="kpi"><div>总用户</div><div class="v">{{ user_count }}</div></div>
+  <div class="kpi"><div>封禁用户</div><div class="v">{{ banned_count }}</div></div>
+  <div class="kpi"><div>在线会话</div><div class="v">{{ active_session_count }}</div></div>
+  <div class="kpi"><div>累计流量(字节)</div><div class="v">{{ traffic }}</div></div>
+</div>
+
+<div class="card">
+  <h3>管理员账号设置</h3>
+  <form method="post" action="{{ url_for('update_admin_account') }}">
+    <div class="row" style="margin-bottom: 8px;">
+      <input name="old_password" type="password" placeholder="当前密码" required>
+      <input name="new_username" placeholder="新管理员账号" required>
+      <input name="new_password" type="password" placeholder="新密码(至少8位)" required>
+      <input name="confirm_password" type="password" placeholder="确认新密码" required>
+      <button type="submit">保存管理员账号</button>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h3>最近管理操作</h3>
+  <form method="post" action="{{ url_for('collect') }}" style="margin-bottom: 10px;">
+    <button type="submit">立即采集连接/流量日志</button>
+  </form>
+  <table>
+    <thead>
+      <tr><th>时间</th><th>动作</th><th>详情</th></tr>
+    </thead>
+    <tbody>
+      {% for log in recent_logs %}
+      <tr>
+        <td>{{ log["created_at"] }}</td>
+        <td>{{ log["action"] }}</td>
+        <td>{{ log["detail"] }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3">暂无记录</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

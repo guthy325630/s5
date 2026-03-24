@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SOCKS5 后台</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; background: #f6f8fb; color: #222; }
+    .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .card { background: #fff; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 12px; }
+    .kpi { background: #fff; border-radius: 8px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .kpi .v { font-size: 20px; font-weight: bold; margin-top: 4px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; vertical-align: middle; }
+    th { background: #fafafa; }
+    .ok { color: #0a7d2c; font-weight: bold; }
+    .ban { color: #b42318; font-weight: bold; }
+    .row { display: flex; gap: 8px; align-items: center; }
+    input, button { padding: 6px 8px; }
+    a { color: #0b57d0; text-decoration: none; }
+    .flash { background: #fff3cd; border: 1px solid #ffe69c; padding: 8px; margin-bottom: 12px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <a href="{{ url_for('dashboard') }}">仪表盘</a> |
+      <a href="{{ url_for('users') }}">用户管理</a> |
+      <a href="{{ url_for('reports') }}">统计报表</a>
+    </div>
+    <div><a href="{{ url_for('logout') }}">退出登录</a></div>
+  </div>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for msg in messages %}
+        <div class="flash">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</body>
+</html>
