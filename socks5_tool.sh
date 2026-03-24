@@ -321,7 +321,50 @@ uninstall_admin_web() {
 }
 
 status_admin_web() {
-    systemctl status socks5-admin.service
+    echo "======================================="
+    echo " SOCKS5 后台服务状态"
+    echo "======================================="
+
+    if ! systemctl list-unit-files | grep -q '^socks5-admin\.service'; then
+        echo "❌ 未检测到 socks5-admin.service（可能尚未安装后台）"
+        echo "提示：请先执行菜单 12 安装后台管理。"
+        echo "======================================="
+        pause
+        menu
+        return
+    fi
+
+    if systemctl is-active --quiet socks5-admin.service; then
+        echo "运行状态 : ✅ 运行中 (active)"
+    else
+        STATE=$(systemctl is-active socks5-admin.service 2>/dev/null)
+        [ -z "$STATE" ] && STATE="unknown"
+        echo "运行状态 : ❌ 未运行 ($STATE)"
+    fi
+
+    if systemctl is-enabled --quiet socks5-admin.service 2>/dev/null; then
+        echo "开机自启 : ✅ 已启用"
+    else
+        ENABLED=$(systemctl is-enabled socks5-admin.service 2>/dev/null)
+        [ -z "$ENABLED" ] && ENABLED="disabled"
+        echo "开机自启 : ❌ 未启用 ($ENABLED)"
+    fi
+
+    MAINPID=$(systemctl show -p MainPID --value socks5-admin.service 2>/dev/null)
+    [ -z "$MAINPID" ] && MAINPID="0"
+    if [ "$MAINPID" != "0" ]; then
+        echo "进程 PID : $MAINPID"
+    else
+        echo "进程 PID : 无"
+    fi
+
+    echo "---------------------------------------"
+    echo "最近日志（最后 8 行）:"
+    journalctl -u socks5-admin.service -n 8 --no-pager -o cat 2>/dev/null || echo "暂无日志"
+    echo "---------------------------------------"
+    echo "原始状态详情:"
+    systemctl status socks5-admin.service --no-pager -l 2>/dev/null
+    echo "======================================="
     pause
     menu
 }
