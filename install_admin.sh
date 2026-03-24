@@ -5,6 +5,7 @@ APP_DIR="/opt/socks5-admin"
 SERVICE_FILE="/etc/systemd/system/socks5-admin.service"
 REPO_RAW_BASE="https://raw.githubusercontent.com/guthy325630/s5/main"
 MAX_RETRY=3
+ADMIN_PORT=$(shuf -i 10000-99999 -n 1)
 
 download_file() {
   local url="$1"
@@ -120,7 +121,7 @@ Environment=SOCKS5_ADMIN_DB=/var/lib/socks5-admin/admin.db
 Environment=SOCKS5_CONFIG_FILE=/etc/sing-box/config.json
 Environment=SOCKS5_ADMIN_CRED_FILE=/var/lib/socks5-admin/admin.credentials
 Environment=SOCKS5_ADMIN_HOST=0.0.0.0
-Environment=SOCKS5_ADMIN_PORT=9580
+Environment=SOCKS5_ADMIN_PORT=$ADMIN_PORT
 Environment=SOCKS5_COLLECT_INTERVAL_SEC=60
 ExecStart=/usr/bin/python3 $APP_DIR/admin_server.py
 Restart=always
@@ -140,7 +141,7 @@ systemctl enable socks5-admin.service
 systemctl restart socks5-admin.service
 
 echo "== 安装完成 =="
-echo "后台地址: http://服务器IP:9580"
+echo "后台地址: http://服务器IP:$ADMIN_PORT"
 echo "默认账号: admin"
 echo "默认密码: admin123"
 echo "请尽快修改服务环境变量中的默认密码。"
