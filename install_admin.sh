@@ -90,16 +90,28 @@ ensure_pip() {
 
 ensure_pip
 
+can_create_venv() {
+  local tmp_dir test_venv
+  tmp_dir=$(mktemp -d /tmp/s5venv.XXXXXX 2>/dev/null || mktemp -d)
+  test_venv="$tmp_dir/testvenv"
+  if python3 -m venv "$test_venv" >/dev/null 2>&1; then
+    rm -rf "$tmp_dir"
+    return 0
+  fi
+  rm -rf "$tmp_dir"
+  return 1
+}
+
 ensure_venv() {
-  if python3 -m venv -h >/dev/null 2>&1; then
+  if can_create_venv; then
     return 0
   fi
 
-  echo "⚠ 未检测到 python venv，正在自动安装..."
+  echo "⚠ venv 当前不可用（可能缺少 ensurepip），正在自动安装依赖..."
   if [ -f /etc/debian_version ]; then
     apt-get update
     apt-get install -y python3-venv || true
-    if ! python3 -m venv -h >/dev/null 2>&1; then
+    if ! can_create_venv; then
       PY_VER=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
       apt-get install -y "python${PY_VER}-venv" || true
     fi
@@ -107,7 +119,7 @@ ensure_venv() {
     yum install -y python3-venv || dnf install -y python3-venv || true
   fi
 
-  if python3 -m venv -h >/dev/null 2>&1; then
+  if can_create_venv; then
     echo "✔ venv 安装完成"
     return 0
   fi
