@@ -55,6 +55,40 @@ if ! command -v python3 >/dev/null 2>&1; then
   fi
 fi
 
+ensure_pip() {
+  if python3 -m pip --version >/dev/null 2>&1; then
+    echo "✔ 已检测到 pip"
+    return 0
+  fi
+
+  echo "⚠ 未检测到 pip，正在自动安装..."
+  if [ -f /etc/debian_version ]; then
+    apt-get update && apt-get install -y python3-pip
+  elif [ -f /etc/redhat-release ]; then
+    yum install -y python3-pip || dnf install -y python3-pip || true
+  fi
+
+  if python3 -m pip --version >/dev/null 2>&1; then
+    echo "✔ pip 安装完成"
+    return 0
+  fi
+
+  echo "⚠ 包管理器安装 pip 失败，尝试 ensurepip 兜底..."
+  python3 -m ensurepip --upgrade >/dev/null 2>&1 || true
+
+  if python3 -m pip --version >/dev/null 2>&1; then
+    echo "✔ ensurepip 初始化成功"
+    return 0
+  fi
+
+  echo "❌ pip 安装失败，请手动执行："
+  echo "Debian/Ubuntu: apt-get install -y python3-pip"
+  echo "CentOS/RHEL: yum install -y python3-pip"
+  exit 1
+}
+
+ensure_pip
+
 mkdir -p "$APP_DIR"
 mkdir -p "$APP_DIR/templates"
 
