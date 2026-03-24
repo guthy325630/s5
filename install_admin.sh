@@ -102,8 +102,10 @@ download_file "$REPO_RAW_BASE/templates/users.html" "$APP_DIR/templates/users.ht
 download_file "$REPO_RAW_BASE/templates/sessions.html" "$APP_DIR/templates/sessions.html" "templates/sessions.html"
 download_file "$REPO_RAW_BASE/templates/reports.html" "$APP_DIR/templates/reports.html" "templates/reports.html"
 
-python3 -m pip install --upgrade pip
-python3 -m pip install flask
+echo "创建独立 Python 虚拟环境..."
+python3 -m venv "$APP_DIR/venv"
+"$APP_DIR/venv/bin/python" -m pip install --upgrade pip
+"$APP_DIR/venv/bin/python" -m pip install flask
 
 cat > "$SERVICE_FILE" <<EOF
 [Unit]
@@ -123,7 +125,7 @@ Environment=SOCKS5_ADMIN_CRED_FILE=/var/lib/socks5-admin/admin.credentials
 Environment=SOCKS5_ADMIN_HOST=0.0.0.0
 Environment=SOCKS5_ADMIN_PORT=$ADMIN_PORT
 Environment=SOCKS5_COLLECT_INTERVAL_SEC=60
-ExecStart=/usr/bin/python3 $APP_DIR/admin_server.py
+ExecStart=$APP_DIR/venv/bin/python $APP_DIR/admin_server.py
 Restart=always
 RestartSec=3
 
