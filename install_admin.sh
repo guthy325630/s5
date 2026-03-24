@@ -90,6 +90,36 @@ ensure_pip() {
 
 ensure_pip
 
+ensure_venv() {
+  if python3 -m venv -h >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "⚠ 未检测到 python venv，正在自动安装..."
+  if [ -f /etc/debian_version ]; then
+    apt-get update
+    apt-get install -y python3-venv || true
+    if ! python3 -m venv -h >/dev/null 2>&1; then
+      PY_VER=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+      apt-get install -y "python${PY_VER}-venv" || true
+    fi
+  elif [ -f /etc/redhat-release ]; then
+    yum install -y python3-venv || dnf install -y python3-venv || true
+  fi
+
+  if python3 -m venv -h >/dev/null 2>&1; then
+    echo "✔ venv 安装完成"
+    return 0
+  fi
+
+  echo "❌ venv 安装失败，请手动安装后重试："
+  echo "Debian/Ubuntu: apt-get install -y python3-venv 或 python3.X-venv"
+  echo "CentOS/RHEL: yum install -y python3-venv"
+  exit 1
+}
+
+ensure_venv
+
 mkdir -p "$APP_DIR"
 mkdir -p "$APP_DIR/templates"
 
